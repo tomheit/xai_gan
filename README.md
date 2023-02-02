@@ -1,6 +1,7 @@
 # xai_gan
 ## xai_gan_cats_vs_dogs.ipynb
 contains a cnn and a gan trained on a dataset of images of cats and dogs.
+The dataset can be found here: https://www.microsoft.com/en-us/download/details.aspx?id=54765
 ## xai_gan_mnist.ipynb
 contains a cnn and a gan trained on the mnist dataset of handwritten numbers.
 ## cats_vs_dogs_gen
