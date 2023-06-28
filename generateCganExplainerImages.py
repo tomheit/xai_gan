@@ -14,10 +14,10 @@ img_data = img_data.reshape(X_train.shape[0], 28, 28, 1)
 img_data = (img_data - 127.5) / 127.5
 print(img_data.shape)
 
-discriminator = load_model('mnist_cgan_100_epochs/cgan_discriminator.h5')
+discriminator = load_model('mnist_cgan/mnist_cgan_100_epochs/cgan_discriminator.h5')
 #discriminator.summary()
 cnn = MnistCnn()
-cnn.loadWeights("MnistCnnTEST")
+cnn.loadWeights("mnist_cnn/MnistCnnTEST")
 
 explainer = Cgan_Explainer()
 
