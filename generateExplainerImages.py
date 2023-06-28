@@ -6,6 +6,8 @@ import time
 from mnistCnn import MnistCnn
 from mnistGan import MnistGan
 
+binCrossentropy = tf.keras.losses.BinaryCrossentropy(from_logits = True)
+
 #load images
 mnist = tf.keras.datasets.mnist
 (x_train, y_train_classes), (x_test, y_test_classes) = mnist.load_data()
@@ -18,11 +20,25 @@ x_test = x_test / 255
 cnn = MnistCnn()
 cnn.loadWeights('MnistCnnTEST')
 gan = MnistGan()
-gan.loadWeights('MnistGanTEST2/mnist_gen', 'MnistGanTEST2/mnist_disc')
+gan.loadWeights('NewMnistGan200Epochs/mnist_gen', 'NewMnistGan200Epochs/mnist_disc')
+
 #define explainer
-@tf.function
+@tf.function #target function
 def g(x, index, classifier, discriminator):
-    res = discriminator(x) - tf.math.log(tf.squeeze(classifier(x))[index])
+    # max p min y_old
+    res = 16*tf.math.log(discriminator(x)) - tf.math.log(tf.squeeze(classifier(x))[index])
+    return res
+
+@tf.function #alternative target function
+def g2(x, index, classifier, discriminator):
+    disc_out = discriminator(x)
+    res = tf.squeeze(-binCrossentropy(tf.ones_like(disc_out), disc_out)) - tf.math.log(tf.squeeze(classifier(x))[index])
+    return res
+
+@tf.function #second target function to max y_new
+def h(x, new_index, classifier, discriminator):
+    # max p max y_new
+    res = tf.math.log(discriminator(x)) + tf.math.log(tf.squeeze(classifier(x))[new_index])
     return res
 
 def explainer(x, classifier, discriminator, maxIter, maxChange, minAlpha):
@@ -30,7 +46,9 @@ def explainer(x, classifier, discriminator, maxIter, maxChange, minAlpha):
     closeEnough = False
     iter = 0
     index = tf.argmax(tf.squeeze(classifier(x))).numpy()
+    newIndex = index
     
+    #first while loop min y_old
     while(not closeEnough and iter < maxIter):
         with tf.GradientTape() as tape:
             gRes = g(x, index, classifier, discriminator)
@@ -43,7 +61,26 @@ def explainer(x, classifier, discriminator, maxIter, maxChange, minAlpha):
         newIndex = tf.argmax(tf.squeeze(classifier(x))).numpy()
         if ((newIndex != index) and (discriminator(x).numpy() > 0)): # done when the prediction has changed
             closeEnough = True
-    print("done after ", iter, " steps")
+    print("first loop done after ", iter, " steps")
+    
+    #second while loop max y_new
+    closeEnough = False
+    iter = 0
+    target_value = 0.9 #target value for y_new
+    while(not closeEnough and iter < maxIter):
+        with tf.GradientTape() as tape:
+            hRes = h(x, newIndex, classifier, discriminator)
+        grad = tape.gradient(hRes, x)
+        maxGrad = tf.abs(tf.reduce_max(grad))
+        alpha = tf.minimum(minAlpha, maxChange/tf.maximum(maxGrad, epsilon))
+        x.assign(x + alpha * grad)
+        x.assign(tf.clip_by_value(x, clip_value_min = 0, clip_value_max = 1))
+        iter += 1
+        y_new = tf.squeeze(classifier(x))[newIndex].numpy()
+        if(y_new >= target_value):
+            closeEnough = True
+            print("y_new: ", y_new)
+    print("second loop done after ", iter, " steps")
     return iter
 #
 #print(x_train[0].shape)
