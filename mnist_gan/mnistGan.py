@@ -5,10 +5,13 @@ import os
 import matplotlib.pyplot as plt
 
 class MnistGan:
-    def __init__(self):
+    def __init__(self, simplifiedDiscriminator = False):
         self.crossEntropy = tf.keras.losses.BinaryCrossentropy(from_logits = False)
         self.generator = self.makeGeneratorModel()
-        self.discriminator = self.makeDiscriminatorModel()
+        if(simplifiedDiscriminator):
+            self.discriminator = self.makeSimplifiedDiscriminatorModel()
+        else:
+            self.discriminator = self.makeDiscriminatorModel()
         self.generatorOptimizer = tf.keras.optimizers.Adam(1e-4)
         self.discriminatorOptimizer = tf.keras.optimizers.Adam(1e-4)
         
@@ -87,6 +90,16 @@ class MnistGan:
         model.add(BatchNormalization())
         model.add(LeakyReLU(alpha = 0.2))
         model.add(Conv2D(256, (4, 4), strides = (2, 2), padding = 'same', use_bias = False))
+        model.add(BatchNormalization())
+        model.add(LeakyReLU(alpha = 0.2))
+        model.add(Conv2D(1, (4, 4), strides = (2, 2), padding = 'same', use_bias = False))
+        model.add(Flatten())
+        model.add(Dense(1, activation = 'sigmoid'))
+        return model
+    
+    def makeSimplifiedDiscriminatorModel(self):
+        model = tf.keras.Sequential()
+        model.add(Conv2D(64, (4, 4), strides = (2, 2), padding = 'same', use_bias = False, input_shape = [28, 28, 1]))
         model.add(BatchNormalization())
         model.add(LeakyReLU(alpha = 0.2))
         model.add(Conv2D(1, (4, 4), strides = (2, 2), padding = 'same', use_bias = False))

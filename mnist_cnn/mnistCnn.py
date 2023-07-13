@@ -3,11 +3,14 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPooling2D, Dropou
 import os
 
 class MnistCnn:
-    def __init__(self):
+    def __init__(self, largerModel = False):
         self.imgHeight = 28
         self.imgWidth = 28
         self.numClasses = 10
-        self.model = self.makeCnnModel()
+        if(largerModel):
+            self.model = self.makeLargerModel()
+        else:
+            self.model = self.makeCnnModel()
     
     def makeCnnModel(self):
         cnn_model = tf.keras.models.Sequential()
@@ -26,6 +29,25 @@ class MnistCnn:
         #                 loss = 'categorical_crossentropy',
         #                 metrics = ['accuracy'])
         #cnn_model.summary()
+        return cnn_model
+    
+    def makeLargerModel(self): #https://www.kaggle.com/code/seyyedrezamoslemi/digit-recognizer
+        cnn_model = tf.keras.models.Sequential()
+        cnn_model.add(Conv2D(filters = 32, kernel_size = (5,5), input_shape = (self.imgHeight, self.imgWidth, 1)))
+        cnn_model.add(Conv2D(filters = 64, kernel_size = (5,5), activation = 'relu'))
+        cnn_model.add(MaxPooling2D())
+        cnn_model.add(Dropout(0.3))
+        cnn_model.add(Conv2D(filters = 128, kernel_size = (3,3), activation = 'relu'))
+        cnn_model.add(MaxPooling2D())
+        cnn_model.add(Dropout(0.3))
+        cnn_model.add(Conv2D(filters = 256, kernel_size = (3,3), activation = 'relu'))
+        cnn_model.add(MaxPooling2D())
+        cnn_model.add(Dropout(0.3))
+        cnn_model.add(BatchNormalization())
+        cnn_model.add(Flatten())
+        cnn_model.add(Dense(32, activation = 'relu'))
+        cnn_model.add(Dropout(0.3))
+        cnn_model.add(Dense(self.numClasses, activation = 'softmax'))
         return cnn_model
     
     def train(self, dataset, _epochs, batchSize):
