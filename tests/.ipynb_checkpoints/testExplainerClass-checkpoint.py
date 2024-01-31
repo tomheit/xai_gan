@@ -22,7 +22,9 @@ def main(argv):
     targetFunc = ""
     targetClass = "second"
     targetDir = ""
-    opts, args = getopt.getopt(argv, "n:c:t:s:d:h")
+    diff_img = False
+    epsilon = 0.1
+    opts, args = getopt.getopt(argv, "n:c:t:s:d:o:e:h")
     for opt, arg in opts:
         if(opt == '-n'):
             numberOfExamples = int(arg)
@@ -53,8 +55,16 @@ def main(argv):
         elif(opt == '-d'):
             targetDir = arg
         elif(opt == '-h'):
-            print("usage: ", argv[0], " [-n NumberOfExamples] [-c NormConstraint] [-t TargetFunction] [-s TargetClassSelection] [-d Directory] %n")
+            print("usage: ", argv[0], " [-n NumberOfExamples] [-c NormConstraint] [-t TargetFunction] [-s TargetClassSelection] [-d Directory] [-e epsilon]")
             print("example: ", argv[0], " -n 100 -c 2 -t loss_gan -s second -d /.")
+        elif(opt == '-o'):
+            if(arg == 'diff'):
+                diff_img = True
+        elif(opt == '-e'):
+            try:
+                epsilon = float(arg)
+            except ValueError:
+                print(arg, " must be a floating point number!")
         else:
             print("Unknown parameter: {0}".format(opt))
     
@@ -113,7 +123,10 @@ def main(argv):
         #targetIndex = tf.math.top_k(confusionMatrix[0], k=2).indices.numpy()[1]
         #print("target index: ", targetIndex)
     
-    fig, ax = plt.subplots(1,2)
+    n_images = 2
+    if(diff_img == True):
+        n_images = 3
+    fig, ax = plt.subplots(1,n_images)
     for i in range(numberOfExamples):
         title = "img"+str(i)
         img = test_data[indices[i]]
@@ -121,13 +134,17 @@ def main(argv):
         if(targetClass == 'confusion'):
             targetIndex = tf.math.top_k(confusionMatrix[predictionsOfIndices[i]], k=2).indices.numpy()[1]
             #print(targetIndex, type(targetIndex))
-        nIter, originalPred, originalConf, newPred, newConf = exp.explain(x, targetIndex, normConstraint = normConst, targetFunction = targetFunc)
+        nIter, originalPred, originalConf, newPred, newConf = exp.explain(x, targetIndex, epsilon = epsilon, normConstraint = normConst, targetFunction = targetFunc)
         title0 = "pred: " + str(originalPred) + ", p: " + str(originalConf)
         title1 = "pred: " + str(newPred) + ", p: " + str(newConf)
         ax[0].imshow(img, cmap = 'gray', interpolation = 'none')
         ax[0].set_title(title0)
         ax[1].imshow(x[0,:,:,0], cmap = 'gray', interpolation = 'none')
         ax[1].set_title(title1)
+        if(diff_img == True):
+            diff = ((x[0] - img)/2 + 0.5)
+            ax[2].imshow(diff, cmap = 'seismic', interpolation = 'none')
+            ax[2].set_title("diff")
         plt.savefig(targetDir + "/img_{:04d}.png".format(i))
         plt.cla()
 

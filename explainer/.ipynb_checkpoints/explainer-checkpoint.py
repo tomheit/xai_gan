@@ -30,6 +30,10 @@ class Explainer:
         
     # Unglaette, sum of differences between pixels, horizontally and vertically (not diagonally)
     def computeU(self,img):
+        height = img.shape[1]
+        width = img.shape[2]
+        # factor for normalization:
+        factor = 1/(height*(width-1)+width*(height-1))
         kernel1 = np.array([[-1,1]], np.float32)
         kernel1 = np.expand_dims(kernel1, -1)
         kernel1 = np.expand_dims(kernel1, -1)
@@ -42,7 +46,8 @@ class Explainer:
         vertU = tf.abs(vertU)
         hSum = tf.reduce_sum(horizU)
         vSum = tf.reduce_sum(vertU)
-        return hSum + vSum
+        result = factor*(hSum + vSum) #normalize U
+        return result
         
     # target functions
     # loss
