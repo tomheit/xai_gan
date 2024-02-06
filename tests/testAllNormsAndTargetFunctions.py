@@ -25,7 +25,7 @@ def main(argv):
     #print(test_data.shape)
     y_test_one_hot = np.eye(10)[y_test]
     
-    numberOfExamples = 100
+    numberOfExamples = 50
     epsilon = 0.01
     
     cnn = mnistCnn.MnistCnn()
@@ -37,12 +37,14 @@ def main(argv):
     gan = mnistGan.MnistGan()
     gan.loadWeights(genPath, discPath)
     
-    directory = "./normalizedU_e0_01/"
+    directory = "./normalizedU_e0_01_fixed/"
     
     normConstraints = ['euclidean', 'max', 'one']
     
     validTargetFunctions = ['loss', 'loss_gan', 'loss_gan_u', 'loss_u',
                             'negative_prob', 'negative_prob_gan', 'negative_prob_gan_u', 'negative_prob_u']
+    
+    classSelections = ['confusion', 'second']
     
      # random images from the test data
     indices = np.random.randint(0, test_data.shape[0], numberOfExamples)
@@ -55,31 +57,34 @@ def main(argv):
     confusionMatrix = tf.math.confusion_matrix(labels = y_test, predictions = predictions, num_classes = 10)
     
     fig, ax = plt.subplots(1,3)
-    
-    for normC in normConstraints:
-        print(normC)
-        for targetF in validTargetFunctions:
-            targetDir = directory + normC + "Norm/" + targetF
-            if(not os.path.exists(targetDir)):
-                os.makedirs(targetDir)
-            for i in range(numberOfExamples):
-                title = "img"+str(i)
-                img = test_data[indices[i]]
-                x = tf.Variable(tf.cast(np.expand_dims(img, 0), tf.float32))
-                # select the second most commonly predicted class
-                targetIndex = tf.math.top_k(confusionMatrix[predictionsOfIndices[i]], k=2).indices.numpy()[1]
-                nIter, originalPred, originalConf, newPred, newConf = exp.explain(x, targetIndex, epsilon = epsilon, normConstraint = normC, targetFunction = targetF)
-                title0 = "pred: " + str(originalPred) + ", p: " + str(originalConf)
-                title1 = "pred: " + str(newPred) + ", p: " + str(newConf)
-                ax[0].imshow(img, cmap = 'gray', interpolation = 'none')
-                ax[0].set_title(title0)
-                ax[1].imshow(x[0,:,:,0], cmap = 'gray', interpolation = 'none')
-                ax[1].set_title(title1)
-                diff = ((x[0] - img)/2 + 0.5)
-                ax[2].imshow(diff, cmap = 'seismic', interpolation = 'none')
-                ax[2].set_title("diff")
-                plt.savefig(targetDir + "/img_{:04d}.png".format(i))
-                plt.cla()
+    for targetClass in classSelections:
+        for normC in normConstraints:
+            print(normC)
+            for targetF in validTargetFunctions:
+                targetDir = directory + targetClass + "/" + normC + "Norm/" + targetF
+                if(not os.path.exists(targetDir)):
+                    os.makedirs(targetDir)
+                for i in range(numberOfExamples):
+                    title = "img"+str(i)
+                    img = test_data[indices[i]]
+                    x = tf.Variable(tf.cast(np.expand_dims(img, 0), tf.float32))
+                    if(targetClass == 'confusion'):
+                        # select the second most commonly predicted class
+                        targetIndex = tf.math.top_k(confusionMatrix[predictionsOfIndices[i]], k=2).indices.numpy()[1]
+                    else:
+                        targetIndex = -1
+                    nIter, originalPred, originalConf, newPred, newConf = exp.explain(x, targetIndex, epsilon = epsilon, normConstraint = normC, targetFunction = targetF)
+                    title0 = "pred: " + str(originalPred) + ", p: " + str(originalConf)
+                    title1 = "pred: " + str(newPred) + ", p: " + str(newConf)
+                    ax[0].imshow(img, cmap = 'gray', interpolation = 'none')
+                    ax[0].set_title(title0)
+                    ax[1].imshow(x[0,:,:,0], cmap = 'gray', interpolation = 'none')
+                    ax[1].set_title(title1)
+                    diff = ((x[0] - img)/2 + 0.5)
+                    ax[2].imshow(diff, cmap = 'seismic', interpolation = 'none')
+                    ax[2].set_title("diff")
+                    plt.savefig(targetDir + "/img_{:04d}.png".format(i))
+                    plt.cla()
             
 
 if __name__ == "__main__":

@@ -189,10 +189,10 @@ class Explainer:
         return (index != newIndex)
     
     def endConditionTarget(self, index, targetIndex, newIndex):
-        return (index == targetIndex)
+        return (newIndex == targetIndex)
     
     # explainer
-    def explain(self, x, targetIndex = -1, maxIter = 600, epsilon = 0.1, err = 1e-16, normConstraint = 'euclidean', targetFunction = 'negativeProb'):
+    def explain(self, x, targetIndex = -1, maxIter = 600, epsilon = 0.1, err = 1e-16, normConstraint = 'euclidean', targetFunction = 'negativeProb', genVideo = False, images = [], outputs = [], probabilities = []):
         # check if a valid target function and norm constraint were given
         if(targetFunction not in self.targetFuncStrings):
             raise ValueError("target function must be in " f"{self.targetFuncStrings}, got {targetFunction}")
@@ -237,6 +237,12 @@ class Explainer:
             x.assign(tf.clip_by_value(x, clip_value_min = 0, clip_value_max = 1))
             iter += 1
             newIndex = tf.argmax(tf.squeeze(self.model(x))).numpy()
+            if(genVideo == True):
+                # save image after every step to create video
+                images.append(x[0,:,:,0])
+                outputs.append(newIndex)
+                prob = tf.squeeze(self.model(x))[newIndex].numpy()
+                probabilities.append(prob)
             if(endCondition(index, targetIndex, newIndex)):
                 closeEnough = True
                 
