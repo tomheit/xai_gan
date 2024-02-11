@@ -7,11 +7,13 @@ import time
 
 sys.path.append('../neural_networks/mnist_cnn')
 sys.path.append('../neural_networks/mnist_gan')
+sys.path.append('../neural_networks/mnist_wgan')
 sys.path.append('../explainer')
 
 import explainer
 import mnistCnn
 import mnistGan
+import wgan
 
 def main(argv):
     (X_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
@@ -31,13 +33,18 @@ def main(argv):
     cnn = mnistCnn.MnistCnn()
     cnn.loadWeights('../neural_networks/mnist_cnn/largerCnn30Epochs')
     
-    #load gan
-    genPath = '../neural_networks/mnist_gan/NewMnistGan200Epochs/mnist_gen'
-    discPath = '../neural_networks/mnist_gan/NewMnistGan200Epochs/mnist_disc'
-    gan = mnistGan.MnistGan()
-    gan.loadWeights(genPath, discPath)
+    #load gan (old gan model)
+    #genPath = '../neural_networks/mnist_gan/NewMnistGan200Epochs/mnist_gen'
+    #discPath = '../neural_networks/mnist_gan/NewMnistGan200Epochs/mnist_disc'
+    #gan = mnistGan.MnistGan()
+    #gan.loadWeights(genPath, discPath)
+    genPath = '../neural_networks/mnist_wgan/wGan_1000_epochs/wgan_generator.h5'
+    discPath = '../neural_networks/mnist_wgan/wGan_1000_epochs/wgan_discriminator.h5'
+    invPath = '../neural_networks/mnist_wgan/wGan_1000_epochs/wgan_inverter.h5'
+    wGan = wgan.WGan()
+    wGan.load_gan(genPath, discPath, invPath)
     
-    directory = "./normalizedU_e0_01_fixed/"
+    directory = "./normalizedU_e0_01_WGan/"
     
     normConstraints = ['euclidean', 'max', 'one']
     
@@ -49,7 +56,7 @@ def main(argv):
      # random images from the test data
     indices = np.random.randint(0, test_data.shape[0], numberOfExamples)
     # create explainer
-    exp = explainer.Explainer(cnn.model, gan.discriminator)
+    exp = explainer.Explainer(cnn.model, wGan.discriminator)
     # predictions
     predictionsOfIndices = tf.argmax(cnn.model(test_data[indices]), axis = 1).numpy()
     predictionsProb = cnn.model(test_data)
