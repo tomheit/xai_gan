@@ -6,6 +6,6 @@ contains the models used for the experiments. Only mnist_cnn and mnist_wgan were
 ### tests
 contains code to run experiments and the results.
 ### natural_adv
-contains the recursive search algorithm made by Zhao et al. used to create natural adversarial examples
+contains the recursive search algorithm made by Zhao et al. used to create natural adversarial examples.
 ### notebooks
-contains notebooks mainly used to test code
+contains notebooks mainly used to test code.
