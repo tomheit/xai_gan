@@ -1,14 +1,11 @@
 # xai_gan
-## MnistExplainerImages
-contains images that compare the original input to the output of the explainer. pred: shows how the image was classified by the cnn. p: is the output of the discriminator for the image. The images were created by generateExplainerImages.py.
-## xai_gan_cats_vs_dogs.ipynb
-contains a cnn and a gan trained on a dataset of images of cats and dogs.
-The dataset can be found here: https://www.microsoft.com/en-us/download/details.aspx?id=54765
-## xai_gan_mnist.ipynb
-contains a cnn and a gan trained on the mnist dataset of handwritten digits.
-## Directories
-cats_vs_dogs_gen contains the generator for the cats vs dogs dataset.
-cats_vs_dogs_disc conatins the discriminator for the cats vs dogs dataset.
-cats_vs_dogs_cnn_model contains the cnn for the cats vs dogs dataset.
-mnist_cnn_model contains the cnn for the mnist dataset.
-GAN_training_checkpoints contains the gan for the mnist dataset.
+## explainer
+contains the explainer class and the target function class.
+## neural_networks
+contains the models used for the experiments. Only mnist_cnn and mnist_wgan were used for the experiments.
+## tests
+contains code to run experiments and the results.
+## natural_adv
+contains the recursive search algorithm made by Zhao et al. used to create natural adversarial examples
+## notebooks
+contains notebooks mainly used to test code
