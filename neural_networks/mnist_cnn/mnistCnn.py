@@ -50,6 +50,7 @@ class MnistCnn:
         cnn_model.add(Dense(self.numClasses, activation = 'softmax'))
         return cnn_model
     
+    # https://github.com/ansh941/MnistSimpleCNN
     def makeM3(self):
         shape = (self.imgHeight, self.imgWidth, 1)
         cnn_model = tf.keras.models.Sequential()
