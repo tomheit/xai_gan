@@ -155,7 +155,16 @@ def rgbModel(x):
         return cnn.model(np.expand_dims(np.expand_dims(grayImages, -1), 0))
     
 def printHelp():
-    msg = "lol"
+    msg = """
+    usage: python limeExplanation.py -o outpath -d distance -H l_H -l l_d -D l_D -U l_U -n numImgs
+    -o: output directory for image
+    -d: string describing distance, one of l1, l2, l1_mad
+    -H: lambda_H weight crossentropy loss in target function
+    -l: lambda_d weight of distance in target function
+    -D: lambda_D weight of discriminator in target function
+    -U: lambda_U weight of U(x) in target function
+    -s: seed for random selection
+    use a weight of 0.0 to disable the term in the target function"""
     print(msg)
     
 if __name__ == "__main__":

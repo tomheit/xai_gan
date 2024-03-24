@@ -1,3 +1,4 @@
+# **** explainer class: performs gradient descent on an image to change the prediction ****
 import tensorflow as tf
 import numpy as np
 import math

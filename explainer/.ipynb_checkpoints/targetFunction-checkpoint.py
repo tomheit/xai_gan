@@ -1,3 +1,4 @@
+# **** constructs the target function that is used in gradient descent ****
 import tensorflow as tf
 import numpy as np
 import math

@@ -1,3 +1,4 @@
+# **** compare different weights lambda_H for the loss function only ****
 import sys, getopt
 import os
 import tensorflow as tf
