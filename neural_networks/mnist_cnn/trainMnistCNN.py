@@ -39,5 +39,14 @@ def trainCnn(inputPath, outputPath, epochs, batchSize, largerModel = False):
     cnn.train(dataset, epochs, batchSize)
     cnn.saveModel(outputPath, overwrite = True)
     
+def printHelp():
+    helpMsg = """
+    python trainMnistCNN.py -i existingCNN -o targetDir -e epochs
+    -i / --ifile:  train the existing model at the given filepath
+    -o / --ofile:  specify where to save the trained model
+    -e / --epochs: specify the number of epochs to train for
+    """
+    print(helpMsg)
+    
 if(__name__ == "__main__"):
     main(sys.argv[1:])
