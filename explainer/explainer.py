@@ -12,7 +12,7 @@ class Explainer:
         self.targetFuncStrings = ['loss', 'loss_gan', 'loss_gan_u', 'loss_u',
                                   'negative_prob', 'negative_prob_gan', 'negative_prob_gan_u', 'negative_prob_u',
                                   'prob', 'prob_gan']
-        self.normStrings = ['max', 'euclidean', 'one']
+        self.normStrings = ['max', 'euclidean', 'one', 'none']
         self.targetFunctions = {'loss':self.targetFuncLoss,
                                 'loss_gan':self.targetFuncLossGan,
                                 'loss_gan_u':self.targetFuncLossGanU,
@@ -28,7 +28,7 @@ class Explainer:
                                 'one':self.oneNorm}
         self.cnnLoss = tf.keras.losses.CategoricalCrossentropy(from_logits = False)
         
-    # Unglaette, sum of differences between pixels, horizontally and vertically (not diagonally)
+    """# Unglaette, sum of differences between pixels, horizontally and vertically (not diagonally)
     def computeU(self,img):
         height = img.shape[1]
         width = img.shape[2]
@@ -116,9 +116,13 @@ class Explainer:
     @tf.function(input_signature=(tf.TensorSpec([None,None,None,None], dtype = tf.float32), tf.TensorSpec(None, dtype = tf.int64), tf.TensorSpec(None, dtype = tf.float32)))
     def targetFuncProbGan(self, x, index, sign):
         res = sign * tf.math.log(tf.squeeze(self.model(x))[index]) + self.discriminator(x)
-        return res
+        return res"""
     
     # norm constraints
+    # none
+    def noNormConst(self, grad, epsilon, x):
+        return grad
+    
     # maximum norm
     def maxNorm(self, grad, epsilon, x):
         res = epsilon * tf.math.sign(grad)
@@ -162,6 +166,17 @@ class Explainer:
             if(budget <= 0):
                 break
         return eta
+    
+    """# distances
+    def distAbs(x1, x2):
+        diff = tf.math.abs(x1 - x2)
+        return tf.math.reduce_sum(diff)
+    
+    # inverse-MAD-weighted L1
+    def distMAD(x1, x2):
+        diff = tf.math.abs(x1 - x2)
+        result = tf.math.divide(diff, MADtf)
+        return tf.math.reduce_sum(result)"""
     
     # utility functions
     # utility function to get row and col from an index

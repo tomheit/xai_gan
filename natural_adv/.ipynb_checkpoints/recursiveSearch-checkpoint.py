@@ -5,11 +5,11 @@ import tensorflow as tf
 class RecursiveSearch:
 
     def __init__(self):
-
+        pass
     # hybrid shrinking search algorithm to generate adversaries
     # https://github.com/zhengliz/natural-adversary/blob/master/image/search.py
     # "Generating Natural Adversarial Examples"
-    def search(self, gen, inv, cnn, x, y, y_t = None, z = None, n_samples = 5000, step = 0.01, l = 0., h = 10., stop = 5, p = 2, verbose = False):
+    def search(self,gen,inv,cnn,x,y,y_t=None,z=None,n_samples=5000,step=0.01,l=0.,h=10.,stop=5,p=2,verbose=False):
         x_adv, y_adv, z_adv, d_adv = None, None, None, None
         # recursion
         counter = 1
